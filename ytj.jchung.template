@@ -1,0 +1,125 @@
+#!/bin/bash
+
+# ytj: youtube jukebox
+
+# Depends on yt, mplayer
+
+
+
+
+
+
+# Parse command line arguments to set behavior of script.
+# Display usage if necessary.
+# If '-k' or '-l' options used, use 'shift' until the youtube search term
+# argument is $1.
+
+
+
+
+
+
+# Create a directory to match the script's search term argument.
+# Replace spaces in the directory name with underscores "_", and omit
+# special characters that would be misinterpreted by the shell.
+# If the youtube search term was "tim o'reilly 2.0" the new directory would be
+# "tim_oreilly_2.0".
+# Change to the newly created directory, so that any new files that
+# are created are created in the new directory.
+
+
+
+
+
+
+# Create the search url $SURL from the search term argument and
+# download the search results page with wget.
+# If the search term was "the avalanches", $SURL would be
+# "http://www.youtube.com/results?search_query=the+avalanches" .
+
+
+
+
+
+
+
+# If youtube found no videos results for the search term, then exit
+# with an error message.
+
+
+
+
+
+
+
+# Extract lines like the following from the search results page:
+# <a id="video-long-title-hPFjzo9K9eg" href="/watch?v=hPFjzo9K9eg" title="Occupation or Not - Eleventh Dream Day" rel="nofollow">
+# Exclude playlists, channels and featured videos, and store the lines
+# in ytj.results:
+
+
+
+
+
+
+
+# From ytj.results, extract the list of video ids $IDS to download;
+# $IDS would contain a list that looks something like
+# "CefcmIBKF5o HhFVSwlncGg k4R_2rfJN8g 1w7OgIMMRc4 ...":
+
+
+
+
+
+
+# From ytj.results, extract the list of video filenames $TITLES (for
+# mplayer to play).
+# Be sure to convert newlines to spaces when creating the $TITLES
+# list, so that the video filenames are space separated; use tr '\n' ' ' .
+# The filenames themselves must not contain spaces, &quot;, &amp;, or
+# anything not in the set [A-Za-z0-9_@-].
+# Filenames must end in ".flv".
+# If ytj.results contains the results of the search "don knuth
+# lecture", $TITLES should contain:
+# Don_Knuth_Part_1m4v.flv Authors@Google_Donald_Knuth.flv Authors@Google_Randall_Munroe_of_xkcd.flv ...
+# IMPORTANT: Make sure that the ytj and yt scripts are generating the same
+# filenames.
+
+
+
+
+
+
+# Schedule mplayer to start playing the list of files in $TITLES
+# after about 10 seconds.  Use nohup.
+# Make mplayer play the files "really quietly," so that nohup.out
+# doesn't get huge.
+
+
+
+
+
+
+# Loop to download videos using the ids in $IDS.
+# Use yt to handle the downloading and saving of videos.
+# Optional:  After each run of yt in the loop, start a background
+#            conversion of the downloaded .flv file to the desired
+#            audio format.
+
+
+
+
+
+
+# If conversion wasn't done in the above loop, convert all the
+# downloaded .flv files to the specified audio format using
+# flv2something.
+
+
+
+
+
+
+# Clean up temporary files.
+# Clean up .flv files if not keeping them.
+# If nothing is being kept, cd .., and remove the search_term directory.
