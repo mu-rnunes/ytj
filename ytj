@@ -89,15 +89,21 @@ IDS=$(cat ytj.results | sed "s/.*query=//g" | sed "s/;/ /g" | sed "s/\n/ /g")
 # IMPORTANT: Make sure that the ytj and yt scripts are generating the same
 # video filenames.
 
-TITLES=$(cat ytj.results | sed "s/http.*;//g" | sed "s/ /_/g" | sed "s/^_*//g" | 
-sed "s/_$//g" | sed "s/[^A-Za-z0-9_@-]//g" | sed "s/\n/ /g" | sed "s/__*/_/g")
+while read line
+do
+	TITLE=$(cat ytj.results | sed "s/http.*;//g" | sed "s/ /_/g" | sed "s/^_*//g" | 
+	sed "s/_$//g" | sed "s/[^A-Za-z0-9_@-]//g" | sed "s/\n/ /g" | sed "s/__*/_/g")
 
-#while x in $TITLES
-#	do 
-#		filetitle=$TITLES.webm
-#		url="https://www.youtube.com/watch?v="$IDS
-#		cclive -q -O $filetitle $url &
-#done
+	VIDEOURL=$(cat ytj.results | sed "s|.*query=|https://www.youtube.com/watch?v=|g" | 
+	sed "s/;/ /g" | sed "s/\n/ /g")
+
+	fileTitle=$TITLE.webm
+
+	cclive -q -O $fileTitle $VIDEOURL
+
+done <ytj.results
+
+
 
 # Schedule mplayer to start playing the list of files in $TITLES
 # after about 10 seconds.  Use nohup.
@@ -121,3 +127,4 @@ sed "s/_$//g" | sed "s/[^A-Za-z0-9_@-]//g" | sed "s/\n/ /g" | sed "s/__*/_/g")
 # Clean up .webm files if not keeping them.
 # If nothing is being kept, cd .., and remove the directory that was created to
 # hold the videos.
+
