@@ -25,7 +25,12 @@
 
 directory=$(echo $1 | tr " " "_" | sed "s/[^A-Za-z0-9_@-\.]//g")
 
-mkdir $directory
+if [ ! -d "$directory" ] 
+then 
+	mkdir $directory
+fi
+
+cd $directory
 
 # Create the search url $SURL from the search argument, and
 # download the search results page with wget.
@@ -61,19 +66,15 @@ wget $SURL --quiet -O $searchTerm.html
 # Store all the extracted lines in ytj.results:
 
 cat $searchTerm.html | grep 'data-context-item-title=' | sed "s/<li class=.*item-title=\"//g" | 
-sed "s/\" data-context-item-.*item-id=\"/ ID = /g" | sed "s/\" data-conte.*ws\">//g" |
-sed "s/&amp;#39;/'/g" | sed "s/&amp;quot;//g" > ytj.results
-
+sed "s|\" data-context-item-.*item-id=\"| http://www.youtube.com/results?search_query=|g" | 
+sed "s/\" data-conte.*ws\">/;/g" | sed "s/&amp;#39;/'/g" | sed "s/&amp;quot;//g" | sed "s/&amp;amp;/,/g"  > ytj.results
 
 # From ytj.results, extract the list of video ids $IDS to download;
 # $IDS would contain a list that looks something like
 # "rARN6agiW7o HhFVSwlncGg k4R_2rfJN8g 1w7OgIMMRc4 ...", where each item in
 # $IDS represents the ID of a youtube video.
 
-
-
-
-
+IDS=$(cat ytj.results | sed "s/.*query=//g" | sed "s/;/ /g" | sed "s/\n/ /g")
 
 # Also from ytj.results, extract the list of video filenames $TITLES (for
 # mplayer to play).
@@ -88,11 +89,15 @@ sed "s/&amp;#39;/'/g" | sed "s/&amp;quot;//g" > ytj.results
 # IMPORTANT: Make sure that the ytj and yt scripts are generating the same
 # video filenames.
 
+TITLES=$(cat ytj.results | sed "s/http.*;//g" | sed "s/ /_/g" | sed "s/^_*//g" | 
+sed "s/_$//g" | sed "s/[^A-Za-z0-9_@-]//g" | sed "s/\n/ /g" | sed "s/__*/_/g")
 
-
-
-
-
+#while x in $TITLES
+#	do 
+#		filetitle=$TITLES.webm
+#		url="https://www.youtube.com/watch?v="$IDS
+#		cclive -q -O $filetitle $url &
+#done
 
 # Schedule mplayer to start playing the list of files in $TITLES
 # after about 10 seconds.  Use nohup.
