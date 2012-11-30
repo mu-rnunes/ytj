@@ -66,8 +66,9 @@ wget $SURL --quiet -O $searchTerm.html
 # Store all the extracted lines in ytj.results:
 
 cat $searchTerm.html | grep 'data-context-item-title=' | sed "s/<li class=.*item-title=\"//g" | 
-sed "s|\" data-context-item-.*item-id=\"| http://www.youtube.com/results?search_query=|g" | 
-sed "s/\" data-conte.*ws\">/;/g" | sed "s/&amp;#39;/'/g" | sed "s/&amp;quot;//g" | sed "s/&amp;amp;/,/g"  > ytj.results
+sed "s|\" data-context-item-.*item-id=\"| http://www.youtube.com/watch?v=|g" | 
+sed "s/\" data-conte.*ws\">/;/g" | sed "s/&amp;#39;/'/g" | sed "s/&amp;quot;//g" | 
+sed "s/&amp;amp;/,/g" | sed "s/;.*//g" | sed "s/     .*//g" | sed "s/^  *//g"> ytj.results
 
 # From ytj.results, extract the list of video ids $IDS to download;
 # $IDS would contain a list that looks something like
@@ -75,6 +76,9 @@ sed "s/\" data-conte.*ws\">/;/g" | sed "s/&amp;#39;/'/g" | sed "s/&amp;quot;//g"
 # $IDS represents the ID of a youtube video.
 
 IDS=$(cat ytj.results | sed "s/.*query=//g" | sed "s/;/ /g" | sed "s/\n/ /g")
+URLS=$(cat ytj.results | sed "s/^.*http//g" | sed "s/;/ /g" | sed "s/\n/ /g")
+
+#echo $URLS
 
 # Also from ytj.results, extract the list of video filenames $TITLES (for
 # mplayer to play).
@@ -89,42 +93,34 @@ IDS=$(cat ytj.results | sed "s/.*query=//g" | sed "s/;/ /g" | sed "s/\n/ /g")
 # IMPORTANT: Make sure that the ytj and yt scripts are generating the same
 # video filenames.
 
-while read line
-do
-	TITLE=$(cat ytj.results | sed "s/http.*;//g" | sed "s/ /_/g" | sed "s/^_*//g" | 
-	sed "s/_$//g" | sed "s/[^A-Za-z0-9_@-]//g" | sed "s/\n/ /g" | sed "s/__*/_/g")
+fileName=$(cat ytj.results | sed "s/http.*;//g" | sed "s/ /_/g" | sed "s/^_*//g" | 
+sed "s/_$//g" | sed "s/[^A-Za-z0-9_@-]//g" | sed "s/\n/ /g" | sed "s/__*/_/g")
 
-	VIDEOURL=$(cat ytj.results | sed "s|.*query=|https://www.youtube.com/watch?v=|g" | 
-	sed "s/;/ /g" | sed "s/\n/ /g")
-
-	fileTitle=$TITLE.webm
-
-	cclive -q -O $fileTitle $VIDEOURL
-
-done <ytj.results
-
-
+TITLES=$(echo $fileName | sed "s/ /\.webm /g")
 
 # Schedule mplayer to start playing the list of files in $TITLES
 # after about 10 seconds.  Use nohup.
 # Make mplayer play the files "really quietly," so that nohup.out
 # doesn't get huge.
 
-
-
-
-
+#nohup bash -c "mplayer $TITLES -really-quiet" &
 
 # Loop to download videos using the ids in $IDS.
 # Use yt to handle the downloading and saving of videos.
 
-
-
-
-
+#cclive -q -O $TITLES $URLS &
 
 # Clean up any temporary files.
 # Clean up .webm files if not keeping them.
 # If nothing is being kept, cd .., and remove the directory that was created to
 # hold the videos.
+
+#case k)
+#	rm *.html
+#	rm *.results
+#case *)
+#	cd ..
+#	rm $directory
+
+
 
