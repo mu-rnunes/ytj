@@ -13,8 +13,6 @@
 # term argument is $1.
 
 
-
-
 # Create a directory to match the script's search argument.
 # Replace spaces in the directory name with underscores "_", and omit
 # special characters that would be misinterpreted by the shell.
@@ -25,9 +23,9 @@
 
 directory=$(echo $1 | tr " " "_" | sed "s/[^A-Za-z0-9_@-\.]//g")
 
-if [ ! -d "$directory" ] 
-then 
-	mkdir $directory
+if [ ! -d "$directory" ]
+then
+		mkdir $directory
 fi
 
 cd $directory
@@ -49,10 +47,10 @@ wget $SURL --quiet -O $searchTerm.html
 noVideos=`grep "No video" $searchTerm.html|wc -l`
 if [ $noVideos -ne 0 ]
 then
-    echo "No videos were found with your search terms"
-	exit	
+	echo "No videos were found with your search terms"
+exit
 else
- 	SURL="http://www.youtube.com/results?search_query=$searchTerm%2C+video&lclk=video"
+	SURL="http://www.youtube.com/results?search_query=$searchTerm%2C+video&lclk=video"
 	wget $SURL --quiet -O $searchTerm.html
 fi
 
@@ -60,16 +58,17 @@ fi
 # following (if searching youtube for "movie trailer 2012"):
 #
 # <li class="yt-grid-box result-item-video context-data-item" data-context-item-title="GREAT GATSBY Trailer (2012) Movie HD" data-context-item-type="video" data-context-item-time="2:28" data-context-item-user="MovieclipsCOMINGSOON" data-context-item-id="rARN6agiW7o" data-context-item-views="7,294,645 views">
-# 
+#
 # The above line of html represents a youtube video with title: "GREAT GATSBY
 # Trailer (2012) Movie HD" and URL: https://www.youtube.com/watch?v=rARN6agiW7o
 #
 # Store all the extracted lines in ytj.results:
 
-cat $searchTerm.html | grep 'data-context-item-title=' | sed "s/<li class=.*item-title=\"//g" | 
-sed "s|\" data-context-item-.*item-id=\"| http://www.youtube.com/watch?v=|g" | 
-sed "s/\" data-conte.*ws\">/;/g" | sed "s/&amp;#39;/39/g" | sed "s/&amp;quot;/quot/g" | 
-sed "s/&amp;amp;/amp/g" | sed "s/;.*//g" | sed "s/     .*//g" | sed "s/^  *//g" | sed "s/$\n//g" > ytj.results
+cat $searchTerm.html | grep 'data-context-item-title=' | sed "s/<li.*item-title=\"//g" |
+sed "s|\" data-context-item-id=\"| http://www.youtube.com/watch?v=|g" |
+sed "s/\" data-context-item-views=.*/;/g" | sed "s/&amp;#39;/39/g" | sed "s/&amp;quot;/quot/g" |
+sed "s/&amp;amp;/amp/g" | sed "s/;.*//g"  | sed "s/$\n//g" | sed "s/\" data.*http/ http/g" |
+sed "s/^     .*//g"> ytj.results
 
 # From ytj.results, extract the list of video ids $IDS to download;
 # $IDS would contain a list that looks something like
@@ -95,7 +94,7 @@ IDS=$(cat ytj.results | sed "s/.*watch?v=//g" | sed "s/;/ /g" | sed "s/\n/ /g")
 # IMPORTANT: Make sure that the ytj and yt scripts are generating the same
 # video filenames.
 
-fileName=$(cat ytj.results | sed "s/http.*$//g" | sed "s/ /_/g" | sed "s/^_*//g" | 
+fileName=$(cat ytj.results | sed "s/http.*$//g" | sed "s/ /_/g" | sed "s/^_*//g" |
 sed "s/_$//g" | sed "s/[^A-Za-z0-9_@-]//g" | sed "s/\n/ /g")
 
 TITLES=$(echo $fileName | sed "s/ /\.webm /g")
@@ -107,9 +106,7 @@ TITLES=$(echo $fileName | sed "s/ /\.webm /g")
 # Make mplayer play the files "really quietly," so that nohup.out
 # doesn't get huge.
 
-sleep 10
-
-nohup bash -c "mplayer $TITLES -really-quiet" &
+( sleep 10 ; mplayer $TITLES -really-quiet -vo null < /dev/null ) &
 
 # Loop to download videos using the ids in $IDS.
 # Use yt to handle the downloading and saving of videos.
@@ -126,12 +123,6 @@ done
 # If nothing is being kept, cd .., and remove the directory that was created to
 # hold the videos.
 
-#case k)
-#	rm *.html
-#	rm *.results
-#case *)
-#	cd ..
-#	rm $directory
-
-
-
+#rm *.html
+#rm *.results
+#rm *.out
